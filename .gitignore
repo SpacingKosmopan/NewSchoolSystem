@@ -1,0 +1,56 @@
+# Zależności i pakiety
+node_modules/
+jspm_packages/
+web_modules/
+
+# Pliki środowiskowe (Zawierają sekrety i klucze API)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Logi aplikacji
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Pliki diagnostyczne i zrzuty pamięci
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+crash
+gc.log
+v8.log
+
+# Katalogi kompilacji i budowania (np. TypeScript / Babel)
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Pamięć podręczna narzędzi i frameworków
+.npm
+.eslintcache
+.stylelintcache
+.prettiercache
+.parcel-cache
+.turbo
+.node_repl_history
+
+# Konfiguracje edytorów i IDE (VS Code, WebStorm)
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db

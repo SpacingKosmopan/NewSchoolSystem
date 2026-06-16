@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      let selectedClass;
+      let classStudents;
+
+      (async () => {
+        const responseClass = await fetch(
+          "http://localhost:3000/api/classes/0",
+        );
+        if (!responseClass.ok) {
+          document.body.innerText = "class not found";
+          return;
+        }
+        const selectedClassResult = await responseClass.json();
+        selectedClass = selectedClassResult.result;
+
+        const responseStudents = await fetch(
+          `http://localhost:3000/api/classes/${selectedClass.id}/students`,
+        );
+        const studentsResult = await responseStudents.json();
+        classStudents = studentsResult.result;
+
+        await renderStudents(classStudents);
+      })();
+
+      async function renderStudents(students) {
+        const unorderedList = document.createElement("ul");
+
+        for (const student of students) {
+          const newElement = document.createElement("li");
+          newElement.innerText = `${student.id}: ${student.firstName} ${student.lastName} `;
+
+          const tableElement = await renderGrades(student.id);
+          newElement.appendChild(tableElement);
+
+          unorderedList.appendChild(newElement);
+        }
+
+        document.body.appendChild(unorderedList);
+      }
+
+      async function renderGrades(studentId) {
+        const gradesRequest = await fetch(
+          `http://localhost:3000/api/students/${studentId}/grades`,
+        );
+        const gradesResult = await gradesRequest.json();
+        const grades = gradesResult.result;
+
+        const table = document.createElement("table");
+        table.style.border = "1px solid black";
+
+        if (!grades || grades.length === 0) {
+          table.innerHTML = "<tr><td>Brak ocen</td></tr>";
+          return table;
+        }
+
+        grades.forEach((g) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><strong>${g.subject}</strong></td>
+            <td>Ocena: ${g.grade}</td>
+            <td>(waga: ${g.weight})</td>
+            <td>${g.comment}</td>
+          `;
+          table.appendChild(row);
+        });
+
+        return table;
+      }
+    </script>
+  </body>
+</html>
