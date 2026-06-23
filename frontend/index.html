@@ -185,10 +185,9 @@
         return gradesBox;
       }
 
-      function newGradeForStudent(id, studentName) {
+      function newGradeForStudent(id) {
         document.getElementById("studentIdInput").value = id;
-        document.getElementById("modalTitle").innerText =
-          `Dodaj ocenę: ${studentName}`;
+        document.getElementById("modalTitle").innerText = `Dodaj ocenę`;
         document.getElementById("gradeForm").reset();
         document.getElementById("gradeModal").style.display = "flex";
       }

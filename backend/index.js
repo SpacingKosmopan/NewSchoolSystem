@@ -132,6 +132,28 @@ app.get("/api/students/:id/grades", (req, res) => {
   res.json({ result });
 });
 
+app.post("/api/students/:id/grades", (req, res) => {
+  const studentId = parseInt(req.params.id);
+  const { grade, weight, subject, comment } = req.body;
+
+  if (!grade || !weight || !subject) {
+    return res.status(400).json({ error: "Brak wymaganych pól" });
+  }
+
+  grades.studentId.push({
+    subject: subject,
+    grade: parseFloat(grade),
+    weight: parseInt(weight),
+    comment: comment || "",
+    improved: null,
+  });
+
+  res.status(201).json({
+    success: true,
+    result: newGrade,
+  });
+});
+
 app.get("/api/students/:id/grades/:subject", (req, res) => {
   const studentId = Number(req.params.id);
   if (!students.find((s) => s.id === studentId))
