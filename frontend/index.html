@@ -4,8 +4,67 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- MODAL -->
+    <div class="modal-overlay" id="gradeModal">
+      <div class="modal-box">
+        <h3 id="modalTitle">Dodaj ocenę</h3>
+        <form id="gradeForm">
+          <input type="hidden" id="studentIdInput" />
+
+          <div class="form-group">
+            <label for="gradeInput">Ocena</label>
+            <input
+              type="number"
+              id="gradeInput"
+              min="1"
+              max="6"
+              step="1"
+              required
+              placeholder="np. 5"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="subjectInput">Przedmiot</label>
+            <input
+              type="text"
+              id="subjectInput"
+              required
+              placeholder="np. Matematyka"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="weightInput">Waga oceny</label>
+            <select id="weightInput">
+              <option value="1">1 (odpowiedź)</option>
+              <option value="2">2 (karta pracy)</option>
+              <option value="3">3 (kartkówka)</option>
+              <option value="5">5 (sprawdzian)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="commentInput">Komentarz</label>
+            <input
+              type="text"
+              id="commentInput"
+              placeholder="np. Aktywność na lekcji"
+            />
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" onclick="closeModal()">
+              Anuluj
+            </button>
+            <button type="submit" class="btn-save">Zapisz</button>
+          </div>
+        </form>
+      </div>
+    </div>
     <script>
       let selectedClass;
       let classStudents;
@@ -31,19 +90,58 @@
       })();
 
       async function renderStudents(students) {
-        const unorderedList = document.createElement("ul");
+        const container = document.createElement("div");
+        container.className = "journal-container";
 
-        for (const student of students) {
-          const newElement = document.createElement("li");
-          newElement.innerText = `${student.id}: ${student.firstName} ${student.lastName} `;
+        const header = document.createElement("div");
+        header.className = "journal-header";
+        header.innerHTML = `<h2>Klasa: ${selectedClass.name || "Dziennik ocen"}</h2>`;
+        container.appendChild(header);
 
-          const tableElement = await renderGrades(student.id);
-          newElement.appendChild(tableElement);
+        const table = document.createElement("table");
+        table.className = "students-table";
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th class="col-num">Lp.</th>
+              <th class="col-actions">Akcje</th>
+              <th class="col-name">Nazwisko i imię</th>
+              <th>Oceny bieżące</th>
+              <th>Średnia</th>
+              <th>Końcowa</th>
+            </tr>
+          </thead>
+          <tbody id="students-tbody"></tbody>
+        `;
+        container.appendChild(table);
 
-          unorderedList.appendChild(newElement);
-        }
+        const tbody = table.querySelector("#students-tbody");
 
-        document.body.appendChild(unorderedList);
+        const gradesPromises = students.map((student) =>
+          renderGrades(student.id),
+        );
+        const allGradesBoxes = await Promise.all(gradesPromises);
+
+        students.forEach((student, index) => {
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            <td class="col-num">${index + 1}</td>
+            <td class="col-actions">
+              <button class="btn-add-grade" onclick="newGradeForStudent(${student.id})">+</button>
+            </td>
+            <td class="col-name">${student.lastName} ${student.firstName}</td>
+          `;
+
+          const gradesTd = document.createElement("td");
+          const studentGradesBox = allGradesBoxes[index];
+          gradesTd.appendChild(studentGradesBox);
+          row.appendChild(gradesTd);
+
+          tbody.appendChild(row);
+        });
+
+        document.body.appendChild(container);
       }
 
       async function renderGrades(studentId) {
@@ -53,27 +151,80 @@
         const gradesResult = await gradesRequest.json();
         const grades = gradesResult.result;
 
-        const table = document.createElement("table");
-        table.style.border = "1px solid black";
+        const gradesBox = document.createElement("div");
+        gradesBox.className = "grades-container";
 
         if (!grades || grades.length === 0) {
-          table.innerHTML = "<tr><td>Brak ocen</td></tr>";
-          return table;
+          gradesBox.innerHTML = '<span class="no-grades">Brak ocen</span>';
+          return gradesBox;
         }
 
-        grades.forEach((g) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td><strong>${g.subject}</strong></td>
-            <td>Ocena: ${g.grade}</td>
-            <td>(waga: ${g.weight})</td>
-            <td>${g.comment}</td>
-          `;
-          table.appendChild(row);
+        grades.forEach((grade) => {
+          let color = "#2196F3";
+          if (grade.weight >= 5) color = "#f44336";
+          if (grade.weight <= 2) color = "#4CAF50";
+
+          if (grade.improved === null) {
+            gradesBox.innerHTML += `
+              <span class="grade-badge" style="background-color: ${color};" title="Temat: ${grade.subject || ""}\nWaga: ${grade.weight || 1}\nKomentarz: ${grade.comment || ""}">
+                ${grade.grade}
+              </span>
+            `;
+          } else {
+            gradesBox.innerHTML += `
+              [<span class="grade-badge" style="background-color: ${color};" title="Temat: ${grade.subject || ""}\nWaga: ${grade.weight || 1}\nKomentarz: ${grade.comment || ""}">
+                ${grade.grade}
+              </span>
+              <span class="grade-badge" style="background-color: ${color};" title="Temat: ${grade.subject || ""}\nWaga: ${grade.weight || 1}\nKomentarz: ${grade.comment || ""}">
+                ${grade.improved}
+              </span>]
+              `;
+          }
         });
 
-        return table;
+        return gradesBox;
       }
+
+      function newGradeForStudent(id, studentName) {
+        document.getElementById("studentIdInput").value = id;
+        document.getElementById("modalTitle").innerText =
+          `Dodaj ocenę: ${studentName}`;
+        document.getElementById("gradeForm").reset();
+        document.getElementById("gradeModal").style.display = "flex";
+      }
+      function closeModal() {
+        document.getElementById("gradeModal").style.display = "none";
+      }
+      document
+        .getElementById("gradeForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const studentId = document.getElementById("studentIdInput").value;
+          const gradeData = {
+            grade: parseInt(document.getElementById("gradeInput").value),
+            subject: document.getElementById("subjectInput").value,
+            weight: parseInt(document.getElementById("weightInput").value),
+            comment: document.getElementById("commentInput").value,
+          };
+          try {
+            const response = await fetch(
+              "http://localhost:3000/api/students/${studentId}/grades",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(gradeData),
+              },
+            );
+            if (response.ok) {
+              closeModal();
+              await renderStudents(classStudents);
+            } else {
+              alert("Błąd podczas dodawania oceny");
+            }
+          } catch (error) {
+            console.error("Błąd sieci:", error);
+          }
+        });
     </script>
   </body>
 </html>
