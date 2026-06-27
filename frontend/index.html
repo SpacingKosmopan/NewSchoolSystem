@@ -207,7 +207,7 @@
           };
           try {
             const response = await fetch(
-              "http://localhost:3000/api/students/${studentId}/grades",
+              `http://localhost:3000/api/students/${studentId}/grades`,
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

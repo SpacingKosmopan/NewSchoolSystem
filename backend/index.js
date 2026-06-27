@@ -136,17 +136,20 @@ app.post("/api/students/:id/grades", (req, res) => {
   const studentId = parseInt(req.params.id);
   const { grade, weight, subject, comment } = req.body;
 
-  if (!grade || !weight || !subject) {
-    return res.status(400).json({ error: "Brak wymaganych pól" });
+  if (isNaN(studentId) || !grade || !weight || !subject) {
+    return res.status(400).json({ error: "Missing data" });
   }
 
-  grades.studentId.push({
+  const newGrade = {
     subject: subject,
     grade: parseFloat(grade),
     weight: parseInt(weight),
     comment: comment || "",
     improved: null,
-  });
+  };
+
+  if (!grades[studentId]) grades[studentId] = [];
+  grades[studentId].push(newGrade);
 
   res.status(201).json({
     success: true,
