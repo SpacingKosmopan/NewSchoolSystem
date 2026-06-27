@@ -12,6 +12,19 @@ let subjects = {
   ENGLISH: "Język angielski",
   BIOLOGY: "Biologia",
 };
+let gradeTypes = {
+  0: "aktywność",
+  1: "inna",
+  2: "kartkówka",
+  3: "odpowiedź ustna",
+  4: "przywidywana roczna",
+  5: "przewidywana śródroczna",
+  6: "roczna",
+  7: "sprawdzian",
+  8: "śródroczna",
+  9: "zadanie",
+  10: "zeszyt",
+};
 
 // Lista klas w szkole
 let classes = [
@@ -104,6 +117,7 @@ app.get("/", (req, res) => {
   res.send("Express.js is working properly");
 });
 
+// * CLASSES * //
 app.get("/api/classes/:id/students", (req, res) => {
   const id = Number(req.params.id);
   if (!classes.find((c) => c.id === id))
@@ -115,6 +129,15 @@ app.get("/api/classes/:id/students", (req, res) => {
   res.json({ result });
 });
 
+app.get("/api/classes/:id", (req, res) => {
+  const classId = Number(req.params.id);
+  const result = classes.find((c) => c.id === classId);
+  if (!result) return res.status(404).json({ message: "Class not found" });
+
+  return res.json({ result });
+});
+
+// * STUDENTS * //
 app.get("/api/students/:id", (req, res) => {
   const studentId = Number(req.params.id);
   const student = students.find((student) => student.id === studentId);
@@ -174,14 +197,6 @@ app.get("/api/students/:id/grades/:subject", (req, res) => {
   res.json({ result });
 });
 
-app.get("/api/classes/:id", (req, res) => {
-  const classId = Number(req.params.id);
-  const result = classes.find((c) => c.id === classId);
-  if (!result) return res.status(404).json({ message: "Class not found" });
-
-  return res.json({ result });
-});
-
 /*
 const keys = Object.keys(allSubjects); 
 Wynik: ["MATH", "POLISH", "ENGLISH", "BIOLOGY"]
@@ -190,6 +205,7 @@ const values = Object.values(allSubjects);
 Wynik: ["Matematyka", "Język polski", "Język angielski", "Biologia"]
 
 */
+// * SUBJECS * //
 app.get("/api/subjects", (req, res) => {
   res.json({ result: subjects });
 });

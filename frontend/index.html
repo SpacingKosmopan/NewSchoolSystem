@@ -16,25 +16,12 @@
 
           <div class="form-group">
             <label for="gradeInput">Ocena</label>
-            <input
-              type="number"
-              id="gradeInput"
-              min="1"
-              max="6"
-              step="1"
-              required
-              placeholder="np. 5"
-            />
+            <select name="gradeInput" id="gradeInput" required></select>
           </div>
 
           <div class="form-group">
             <label for="subjectInput">Przedmiot</label>
-            <input
-              type="text"
-              id="subjectInput"
-              required
-              placeholder="np. Matematyka"
-            />
+            <select name="subjectInput" id="subjectInput" required></select>
           </div>
 
           <div class="form-group">
@@ -46,6 +33,12 @@
               <option value="5">5 (sprawdzian)</option>
             </select>
           </div>
+
+          <!--TODO: DATA -->
+          <!--TODO: WSTAWIAJĄCY -->
+          <!--TODO: POPRAWA -->
+          <!--TODO: KATEGORIE -->
+          <!--TODO: WAGI -->
 
           <div class="form-group">
             <label for="commentInput">Komentarz</label>
@@ -68,6 +61,26 @@
     <script>
       let selectedClass;
       let classStudents;
+      let subjects;
+
+      const gradesValues = [
+        { name: "1", value: "1" },
+        { name: "1+", value: "1.25" },
+        { name: "2-", value: "1.75" },
+        { name: "2", value: "2" },
+        { name: "2+", value: "2.25" },
+        { name: "3-", value: "2.75" },
+        { name: "3", value: "3" },
+        { name: "3+", value: "3.25" },
+        { name: "4-", value: "3.75" },
+        { name: "4", value: "4" },
+        { name: "4+", value: "4.25" },
+        { name: "5-", value: "4.75" },
+        { name: "5", value: "5" },
+        { name: "5+", value: "5.25" },
+        { name: "6-", value: "5.75" },
+        { name: "6", value: "6" },
+      ];
 
       (async () => {
         const responseClass = await fetch(
@@ -86,6 +99,27 @@
         const studentsResult = await responseStudents.json();
         classStudents = studentsResult.result;
 
+        const responseSubjects = await fetch(
+          `http://localhost:3000/api/subjects`,
+        );
+        const subjectsResult = await responseSubjects.json();
+        subjects = subjectsResult.result;
+
+        //
+        document.querySelector("#gradeInput").innerHTML = "";
+
+        gradesValues.forEach((g) => {
+          document.querySelector("#gradeInput").innerHTML +=
+            `<option value=${g.value}>${g.name}</option>`;
+        });
+
+        const subjectSelectField = document.getElementById("subjectInput");
+        subjectSelectField.innerHTML = "";
+        const values = Object.values(subjects);
+        values.forEach((value, index) => {
+          subjectSelectField.innerHTML += `<option value="${value}">${value}</option>`;
+        });
+        //
         await renderStudents(classStudents);
       })();
 
